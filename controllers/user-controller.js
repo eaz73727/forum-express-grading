@@ -38,15 +38,31 @@ const userController = {
     res.redirect('/signin')
   },
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.id, {
-      include: [{ model: Comment, include: Restaurant }],
-      nest: true
-    })
-      .then(userInfo => {
-        if (!userInfo) throw new Error("User didn't exist!")
-        return res.render('users/profile', { user: getUser(req), userInfo: userInfo.toJSON() })
+    const userId = Number(req.params.id)
+    return Promise.all([
+      User.findByPk(userId, {
+        include: [
+          { model: User, as: 'Followers', attributes: ['id', 'name', 'image'] },
+          { model: User, as: 'Followings', attributes: ['id', 'name', 'image'] },
+          { model: Restaurant, as: 'FavoritedRestaurants', attributes: ['id', 'name', 'image'] }
+        ]
+      }),
+      Comment.findAll({
+        where: { userId },
+        include: Restaurant,
+        group: 'restaurantId',
+        nest: true,
+        raw: true
       })
-      .catch(err => next(err))
+    ])
+      .then(([userProfile, comments]) => {
+        if (!userProfile) throw new Error("User didn't exist!")
+        res.render('users/profile', {
+          user: getUser(req),
+          userProfile: userProfile.toJSON(),
+          comments
+        })
+      })
   },
   editUser: (req, res, next) => {
     return User.findByPk(req.params.id, {
@@ -169,6 +185,8 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const { userId } = req.params
+    console.log(getUser(req).id)
+    if (getUser(req).id === Number(userId)) throw new Error('無法追隨自己！')
     Promise.all([
       User.findByPk(userId),
       Followship.findOne({
@@ -190,6 +208,8 @@ const userController = {
       .catch(err => next(err))
   },
   removeFollowing: (req, res, next) => {
+    const { userId } = req.params
+    if (getUser(req).id === Number(userId)) throw new Error('無法追隨自己！')
     Followship.findOne({
       where: {
         followerId: req.user.id,
