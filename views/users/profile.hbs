@@ -3,33 +3,93 @@
     <div class='col-md-3'>
       <img
         class='img-responsive center-block rounded-circle'
-        src='{{userInfo.image}}'
-        alt='{{userInfo.id}}'
+        src='{{userProfile.image}}'
+        alt='{{userProfile.id}}'
         style='width:250px;height:250px'
       />
     </div>
     <div class='col-md-4'>
-      <h3>{{userInfo.name}}</h3>
-      <p>{{userInfo.email}}</p>
-      {{#ifCond userInfo.id user.id}}
-        <a href='/users/{{userInfo.id}}/edit' class='btn btn-primary'>edit</a>
+      <h3>{{userProfile.name}}</h3>
+      <p>{{userProfile.email}}</p>
+      <p class="text-bold">{{comments.length}} 個已評論的餐廳。</p>
+      <p class="text-bold">{{userProfile.FavoritedRestaurants.length}} 個已收藏的餐廳。</p>
+      <p class="text-bold">{{userProfile.Followings.length}} followings(追隨中)。</p>
+      <p class="text-bold">{{userProfile.Followers.length}} followers(追隨者)。</p>
+      {{#ifCond userProfile.id user.id}}
+        <a href='/users/{{userProfile.id}}/edit' class='btn btn-primary'>edit</a>
       {{/ifCond}}
     </div>
   </div>
   <div class='row mt-5'>
-    <div class='col-12'>
+    <div class='col-md-4'>
       <div class='card'>
         <div class='card-header'>
-          {{#if userInfo.Comments.length}}{{userInfo.Comments.length}}{{else}}0{{/if}} 則已評論的餐廳。
+          {{userProfile.Followings.length}} following(追隨中)
         </div>
         <div class='card-body d-flex flex-wrap'>
-          {{#each userInfo.Comments}}
-          <div class="col-1 m-1" style="width:80px">
-            <a href='/restaurants/{{this.Restaurant.id}}'>
-              <img style="width:80px;height:80px" src="{{this.Restaurant.image}}" alt="{{this.Restaurant.id}}">
+          {{#if userProfile.Followings.length}}
+          {{#each userProfile.Followings}}
+            <a class="m-1" href='/users/{{this.id}}'>
+              <img style='width:80px;height:80px' src='{{this.image}}' alt='{{this.id}}' title="{{this.name}}" />
             </a>
-          </div>
           {{/each}}
+          {{else}}
+          <h5>您還沒有追隨任何人！</h5>
+          {{/if}}
+        </div>
+      </div>
+      <div class='card mt-3'>
+          <div class='card-header'>
+            {{userProfile.Followers.length}} follower(追隨者)
+          </div>
+          <div class='card-body d-flex flex-wrap'>
+            {{#if userProfile.Followers.length}}
+            {{#each userProfile.Followers}}
+              <a class="m-1" href='/users/{{this.id}}'>
+                <img style='width:80px;height:80px' src='{{this.image}}' alt='{{this.id}}' title="{{this.name}}" />
+              </a>
+            {{/each}}
+            {{else}}
+            <h5>還沒有任何人追隨您！</h5>
+            {{/if}}
+          </div>
+        </div>
+    </div>
+    <div class='col-md-8'>
+      <div class='card'>
+        <div class='card-header'>
+          {{#if
+            comments.length
+          }}{{comments.length}}{{else}}0{{/if}}
+          個已評論的餐廳。
+        </div>
+        <div class='card-body d-flex flex-wrap'>
+          {{#each comments}}
+              <a class="m-1" href='/restaurants/{{this.Restaurant.id}}'>
+                <img
+                  style='width:60px;height:60px'
+                  src='{{this.Restaurant.image}}'
+                  alt='{{this.Restaurant.id}}'
+                  title="{{this.Restaurant.name}}"
+                />
+              </a>
+          {{/each}}
+        </div>
+      </div>
+      <div class="card mt-3">
+        <div class="card-header">
+        {{#if userProfile.FavoritedRestaurants.length}}{{userProfile.FavoritedRestaurants.length}}{{else}}0{{/if}} 個收藏的餐廳。
+        </div>
+        <div class="card-body d-flex flex-wrap">
+          {{#if userProfile.FavoritedRestaurants.length}}
+          {{#each userProfile.FavoritedRestaurants}}
+          <a class="m-1" href="/restaurants/{{this.id}}">
+            <img style="width:60px;height:60px" src="{{this.image}}" alt="{{this.id}}" title="{{this.name}}">
+          </a>
+          {{/each}}
+          {{else}}
+          <h5>您還沒有收藏的餐廳！</h5>
+          {{/if}}
         </div>
       </div>
     </div>
